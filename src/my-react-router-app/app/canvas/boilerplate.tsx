@@ -7,6 +7,26 @@ const newPixelValue = (value: number, error: number) => {
   return value + error;
 };
 
+const getBrightness = (x: number, y: number, p5: P5CanvasInstance) => {
+  const index = (x + y * p5.width) * 4;
+  const r = p5.pixels[index];
+  const g = p5.pixels[index + 1];
+  const b = p5.pixels[index + 2];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+const setBrightness = (
+  x: number,
+  y: number,
+  p5: P5CanvasInstance,
+  value: number
+) => {
+  const index = (x + y * p5.width) * 4;
+  p5.pixels[index] = value;
+  p5.pixels[index + 1] = value;
+  p5.pixels[index + 2] = value;
+};
+
 const sketch = (p5: P5CanvasInstance) => {
   let video: any;
   const WIDTH = 320;
@@ -23,87 +43,50 @@ const sketch = (p5: P5CanvasInstance) => {
     p5.translate(video.width, 0);
     p5.scale(-1, 1);
 
-    const histogram:any = {};
     p5.image(video, 0, 0);
     p5.loadPixels();
     for (let y = 0; y < video.height; y++) {
       for (let x = 0; x < video.width; x++) {
-        const index = (x + y * video.width) * 4;
-        const r = p5.pixels[index];
-        const g = p5.pixels[index + 1];
-        const b = p5.pixels[index + 2];
-        const brightness = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const brightness = getBrightness(x, y, p5);
         const quantized = brightness > 127 ? 255 : 0;
         const error = brightness - quantized;
-        p5.pixels[index] = quantized;
-        p5.pixels[index + 1] = quantized;
-        p5.pixels[index + 2] = quantized;
-        histogram[quantized] = (histogram[quantized] || 0) + 1;
+        setBrightness(x, y, p5, quantized);
 
         if (x + 1 < video.width) {
-          const idxRight = index + 4;
-          const rRight = p5.pixels[idxRight];
-          const gRight = p5.pixels[idxRight + 1];
-          const bRight = p5.pixels[idxRight + 2];
-          const brightnessRight =
-            0.2126 * rRight + 0.7152 * gRight + 0.0722 * bRight;
+          const brightnessRight = getBrightness(x + 1, y, p5);
           const newBrightnessRight = newPixelValue(
             brightnessRight,
             (error * 7) / 16
           );
-          p5.pixels[idxRight] = newBrightnessRight;
-          p5.pixels[idxRight + 1] = newBrightnessRight;
-          p5.pixels[idxRight + 2] = newBrightnessRight;
+          setBrightness(x + 1, y, p5, newBrightnessRight);
         }
         if (x - 1 >= 0 && y + 1 < video.height) {
-          const idxBottomLeft = index + (video.width - 1) * 4;
-          const rBottomLeft = p5.pixels[idxBottomLeft];
-          const gBottomLeft = p5.pixels[idxBottomLeft + 1];
-          const bBottomLeft = p5.pixels[idxBottomLeft + 2];
-          const brightnessBottomLeft =
-            0.2126 * rBottomLeft + 0.7152 * gBottomLeft + 0.0722 * bBottomLeft;
+          const brightnessBottomLeft = getBrightness(x - 1, y + 1, p5);
           const newBrightnessBottomLeft = newPixelValue(
             brightnessBottomLeft,
             (error * 3) / 16
           );
-          p5.pixels[idxBottomLeft] = newBrightnessBottomLeft;
-          p5.pixels[idxBottomLeft + 1] = newBrightnessBottomLeft;
-          p5.pixels[idxBottomLeft + 2] = newBrightnessBottomLeft;
+          setBrightness(x - 1, y + 1, p5, newBrightnessBottomLeft);
         }
         if (y + 1 < video.height) {
-          const idxBottom = index + video.width * 4;
-          const rBottom = p5.pixels[idxBottom];
-          const gBottom = p5.pixels[idxBottom + 1];
-          const bBottom = p5.pixels[idxBottom + 2];
-          const brightnessBottom =
-            0.2126 * rBottom + 0.7152 * gBottom + 0.0722 * bBottom;
+          const brightnessBottom = getBrightness(x, y + 1, p5);
           const newBrightnessBottom = newPixelValue(
             brightnessBottom,
             (error * 5) / 16
           );
-          p5.pixels[idxBottom] = newBrightnessBottom;
-          p5.pixels[idxBottom + 1] = newBrightnessBottom;
-          p5.pixels[idxBottom + 2] = newBrightnessBottom;
+          setBrightness(x, y + 1, p5, newBrightnessBottom);
         }
-        if (x + 1 < video.width && y + 1 < video.height) {  
-          const idxBottomRight = index + (video.width + 1) * 4;
-          const rBottomRight = p5.pixels[idxBottomRight];
-          const gBottomRight = p5.pixels[idxBottomRight + 1];
-          const bBottomRight = p5.pixels[idxBottomRight + 2];
-          const brightnessBottomRight =
-            0.2126 * rBottomRight + 0.7152 * gBottomRight + 0.0722 * bBottomRight;
+        if (x + 1 < video.width && y + 1 < video.height) {
+          const brightnessBottomRight = getBrightness(x + 1, y + 1, p5);
           const newBrightnessBottomRight = newPixelValue(
             brightnessBottomRight,
             (error * 1) / 16
           );
-          p5.pixels[idxBottomRight] = newBrightnessBottomRight;
-          p5.pixels[idxBottomRight + 1] = newBrightnessBottomRight;
-          p5.pixels[idxBottomRight + 2] = newBrightnessBottomRight;
-        } 
+          setBrightness(x + 1, y + 1, p5, newBrightnessBottomRight);
+        }
       }
     }
     p5.updatePixels();
-    console.log(histogram);
   };
 };
 
