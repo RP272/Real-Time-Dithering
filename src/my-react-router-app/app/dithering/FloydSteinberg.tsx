@@ -137,59 +137,65 @@ export default function FloydSteinberg() {
     if (fpsRef.current) fpsRef.current.textContent = ` FPS: ${fps.toFixed(2)}`;
   };
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center font-[Typewriter]">
-      <div className="flex flex-col absolute top-1 left-1 text-white p-1">
-        <Link to="/">
-          <button className="mb-5 cursor-pointer text-black p-2 bg-white rounded-md hover:bg-gray-200">
-            Back to Home
-          </button>
-        </Link>
+    <div className="flex flex-col h-dvh items-center justify-center font-[Typewriter]">
+      <div className="flex flex-col h-full items-center justify-center">
+        <h1 className="text-2xl mb-5">Floyd-Steinberg Dithering</h1>
 
-        <button
-          id="savePhotoButton"
-          className="mb-5 cursor-pointer text-black p-2 bg-white rounded-md hover:bg-gray-200"
+        <div
+          hidden={!showFPS}
+          ref={fpsRef}
+          className="text-black bg-white p-1 rounded text-2xl mb-5 font-mono"
         >
-          Save Photo
-        </button>
-
-        <div>
-          <input
-            className="mr-3"
-            id="ditheringToggle"
-            type="checkbox"
-            checked={ditheringOn}
-            onChange={() => setDitheringOn(!ditheringOn)}
-          />
-          <label htmlFor="ditheringToggle">Toggle Dithering</label>
+          FPS: 0.00
         </div>
 
-        <div>
-          <input
-            className="mr-3"
-            id="fpsToggle"
-            type="checkbox"
-            checked={showFPS}
-            onChange={() => setShowFPS(!showFPS)}
-          />
-          <label htmlFor="fpsToggle">Show FPS</label>
+        <P5Canvas
+          sketch={sketch}
+          ditheringOn={ditheringOn}
+          onFPSChange={handleFPS}
+        />
+      </div>
+
+      <div className="flex w-full text-white p-3 bg-stone-900 h-full items-center justify-around flex-1">
+        <div className="flex w-full justify-around flex-1 items-center md:flex-row flex-col">
+          <Link to="/" className="flex items-center">
+            <button className="cursor-pointer text-black p-2 m-1 bg-white rounded-md hover:bg-gray-200">
+              Back to Home
+            </button>
+          </Link>
+
+          <button
+            id="savePhotoButton"
+            className="cursor-pointer text-black p-2 m-1 bg-white rounded-md hover:bg-gray-200"
+          >
+            Save Photo
+          </button>
+        </div>
+
+        <div className="w-full flex-1 flex justify-around items-center  md:flex-row flex-col">
+          <div>
+            <input
+              className="mr-3"
+              id="ditheringToggle"
+              type="checkbox"
+              checked={ditheringOn}
+              onChange={() => setDitheringOn(!ditheringOn)}
+            />
+            <label htmlFor="ditheringToggle">Toggle Dithering</label>
+          </div>
+
+          <div>
+            <input
+              className="mr-3"
+              id="fpsToggle"
+              type="checkbox"
+              checked={showFPS}
+              onChange={() => setShowFPS(!showFPS)}
+            />
+            <label htmlFor="fpsToggle">Show FPS</label>
+          </div>
         </div>
       </div>
-
-      <h1 className="text-2xl mb-5">Floyd-Steinberg Dithering</h1>
-
-      <div
-        hidden={!showFPS}
-        ref={fpsRef}
-        className="text-black bg-white p-1 rounded text-2xl mb-5 font-mono"
-      >
-        FPS: 0.00
-      </div>
-
-      <P5Canvas
-        sketch={sketch}
-        ditheringOn={ditheringOn}
-        onFPSChange={handleFPS}
-      />
     </div>
   );
 }
