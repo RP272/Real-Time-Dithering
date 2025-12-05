@@ -44,6 +44,11 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
   let video: any;
   const WIDTH = 320;
   const HEIGHT = 240;
+  
+  const bayerMatrix = [
+    [0, 2],
+    [3, 1]
+  ];
 
   p5.setup = () => {
     p5.createCanvas(WIDTH, HEIGHT, p5.P2D);
@@ -79,52 +84,14 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
 
     if (!ditheringOn) return;
     p5.loadPixels();
-    for (let y = 0; y < video.height; y++) {
-      for (let x = 0; x < video.width; x++) {
-        const brightness = getBrightness(x, y, p5);
-        const quantized = brightness > 127 ? 255 : 0;
-        const error = brightness - quantized;
-        setBrightness(x, y, p5, quantized);
 
-        if (x + 1 < video.width) {
-          const brightnessRight = getBrightness(x + 1, y, p5);
-          const newBrightnessRight = newPixelValue(
-            brightnessRight,
-            (error * 7) / 16
-          );
-          setBrightness(x + 1, y, p5, newBrightnessRight);
-        }
-        if (x - 1 >= 0 && y + 1 < video.height) {
-          const brightnessBottomLeft = getBrightness(x - 1, y + 1, p5);
-          const newBrightnessBottomLeft = newPixelValue(
-            brightnessBottomLeft,
-            (error * 3) / 16
-          );
-          setBrightness(x - 1, y + 1, p5, newBrightnessBottomLeft);
-        }
-        if (y + 1 < video.height) {
-          const brightnessBottom = getBrightness(x, y + 1, p5);
-          const newBrightnessBottom = newPixelValue(
-            brightnessBottom,
-            (error * 5) / 16
-          );
-          setBrightness(x, y + 1, p5, newBrightnessBottom);
-        }
-        if (x + 1 < video.width && y + 1 < video.height) {
-          const brightnessBottomRight = getBrightness(x + 1, y + 1, p5);
-          const newBrightnessBottomRight = newPixelValue(
-            brightnessBottomRight,
-            (error * 1) / 16
-          );
-          setBrightness(x + 1, y + 1, p5, newBrightnessBottomRight);
-        }
-      }
-    }
+    // TODO: Implement Bayer Ordered Dithering
+
     p5.updatePixels();
   };
 };
 
-export default function FloydSteinberg() {
+export default function BayerOrdered() {
   const [ditheringOn, setDitheringOn] = useState(false);
   const [showFPS, setShowFPS] = useState(true);
 
@@ -136,7 +103,7 @@ export default function FloydSteinberg() {
         </button>
       </Link>
 
-      <h1 className="text-2xl mb-10">Floyd-Steinberg Dithering</h1>
+      <h1 className="text-2xl mb-10">Bayer Ordered Dithering</h1>
 
       <div className="flex flex-col absolute top-1 right-1 text-white p-1">
         <div>
