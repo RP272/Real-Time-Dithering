@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Typewriter';
+  src: url('./JMH Typewriter.ttf') format('truetype');
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Typewriter Bold';
+  src: url('./JMH\ Typewriter-Bold.ttf') format('truetype');
+  font-style: bold;
+}
