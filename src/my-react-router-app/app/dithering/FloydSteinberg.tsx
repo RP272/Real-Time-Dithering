@@ -1,5 +1,7 @@
 import { P5Canvas } from "@p5-wrapper/react";
-import type { P5CanvasInstance } from "@p5-wrapper/react";
+import type { P5CanvasInstance, SketchProps } from "@p5-wrapper/react";
+import { useState } from "react";
+import { Link } from "react-router";
 
 const newPixelValue = (value: number, error: number) => {
   if (value + error < 0) return 0;
@@ -7,7 +9,11 @@ const newPixelValue = (value: number, error: number) => {
   return value + error;
 };
 
-const getBrightness = (x: number, y: number, p5: P5CanvasInstance) => {
+const getBrightness = (
+  x: number,
+  y: number,
+  p5: P5CanvasInstance<MySketchProps>
+) => {
   const index = (x + y * p5.width) * 4;
   const r = p5.pixels[index];
   const g = p5.pixels[index + 1];
@@ -18,7 +24,7 @@ const getBrightness = (x: number, y: number, p5: P5CanvasInstance) => {
 const setBrightness = (
   x: number,
   y: number,
-  p5: P5CanvasInstance,
+  p5: P5CanvasInstance<MySketchProps>,
   value: number
 ) => {
   const index = (x + y * p5.width) * 4;
@@ -27,10 +33,16 @@ const setBrightness = (
   p5.pixels[index + 2] = value;
 };
 
-const sketch = (p5: P5CanvasInstance) => {
+type MySketchProps = SketchProps & {
+  ditheringOn: boolean;
+};
+
+const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
+  let ditheringOn: boolean = false;
   let video: any;
   const WIDTH = 320;
   const HEIGHT = 240;
+
   p5.setup = () => {
     p5.createCanvas(WIDTH, HEIGHT, p5.P2D);
     p5.pixelDensity(1);
@@ -39,11 +51,18 @@ const sketch = (p5: P5CanvasInstance) => {
     video.hide();
   };
 
+  p5.updateWithProps = (props) => {
+    if (props.ditheringOn !== undefined) {
+      ditheringOn = props.ditheringOn;
+    }
+  };
+
   p5.draw = () => {
     p5.translate(video.width, 0);
     p5.scale(-1, 1);
 
     p5.image(video, 0, 0);
+    if (!ditheringOn) return;
     p5.loadPixels();
     for (let y = 0; y < video.height; y++) {
       for (let x = 0; x < video.width; x++) {
@@ -90,6 +109,24 @@ const sketch = (p5: P5CanvasInstance) => {
   };
 };
 
-export default function Dithering() {
-  return <P5Canvas sketch={sketch} />;
+export default function FloydSteinberg() {
+  const [ditheringOn, setDitheringOn] = useState(false);
+
+  return (
+    <div className="w-full h-screen flex flex-col items-center justify-center font-[Typewriter]">
+      <Link to="/">
+        <button className="cursor-pointer absolute top-1 left-1 text-black p-2 bg-white rounded-md hover:bg-gray-200">
+          Back to Home
+        </button>
+      </Link>
+
+      <button
+        onClick={() => setDitheringOn(!ditheringOn)}
+        className="cursor-pointer absolute top-1 right-1 text-black p-2 bg-white rounded-md hover:bg-gray-200"
+      >
+        Toggle Dithering
+      </button>
+      <P5Canvas sketch={sketch} ditheringOn={ditheringOn} />
+    </div>
+  );
 }
