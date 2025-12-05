@@ -50,6 +50,13 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
     video = p5.createCapture(p5.VIDEO);
     video.size(WIDTH, HEIGHT);
     video.hide();
+
+    const saveButton = p5.select("#savePhotoButton");
+    if (!saveButton) return;
+    const saveDrawing = () => {
+      p5.saveCanvas("FSD", "png");
+    };
+    saveButton.mousePressed(saveDrawing);
   };
 
   p5.updateWithProps = (props) => {
@@ -131,23 +138,20 @@ export default function BayerOrdered() {
   };
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center font-[Typewriter]">
-      <Link to="/">
-        <button className="cursor-pointer absolute top-1 left-1 text-black p-2 bg-white rounded-md hover:bg-gray-200">
-          Back to Home
+      <div className="flex flex-col absolute top-1 left-1 text-white p-1">
+        <Link to="/">
+          <button className="mb-5 cursor-pointer text-black p-2 bg-white rounded-md hover:bg-gray-200">
+            Back to Home
+          </button>
+        </Link>
+
+        <button
+          id="savePhotoButton"
+          className="mb-5 cursor-pointer text-black p-2 bg-white rounded-md hover:bg-gray-200"
+        >
+          Save Photo
         </button>
-      </Link>
 
-      <h1 className="text-2xl mb-5">Bayer Ordered Dithering</h1>
-
-      <div
-        hidden={!showFPS}
-        ref={fpsRef}
-        className="text-black bg-white p-1 rounded text-2xl mb-5 font-mono"
-      >
-        FPS: 0.00
-      </div>
-
-      <div className="flex flex-col absolute top-1 right-1 text-white p-1">
         <div>
           <input
             className="mr-3"
@@ -207,12 +211,22 @@ export default function BayerOrdered() {
         </div>
       </div>
 
+      <h1 className="text-2xl mb-5">Bayer Ordered Dithering</h1>
+
+      <div
+        hidden={!showFPS}
+        ref={fpsRef}
+        className="text-black bg-white p-1 rounded text-2xl mb-5 font-mono"
+      >
+        FPS: 0.00
+      </div>
+
       <P5Canvas
         sketch={sketch}
         ditheringOn={ditheringOn}
         bayerSize={bayerSize}
         onFPSChange={handleFPS}
-/>
+      />
     </div>
   );
 }
