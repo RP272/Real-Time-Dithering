@@ -35,16 +35,19 @@ const setBrightness = (
 
 type MySketchProps = SketchProps & {
   ditheringOn: boolean;
+  showFPS: boolean;
 };
 
 const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
   let ditheringOn: boolean = false;
+  let showFPS: boolean = true;
   let video: any;
   const WIDTH = 320;
   const HEIGHT = 240;
 
   p5.setup = () => {
     p5.createCanvas(WIDTH, HEIGHT, p5.P2D);
+    p5.frameRate(60);
     p5.pixelDensity(1);
     video = p5.createCapture(p5.VIDEO);
     video.size(WIDTH, HEIGHT);
@@ -54,6 +57,7 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
   p5.updateWithProps = (props) => {
     if (props.ditheringOn !== undefined) {
       ditheringOn = props.ditheringOn;
+      showFPS = props.showFPS;
     }
   };
 
@@ -62,6 +66,17 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
     p5.scale(-1, 1);
 
     p5.image(video, 0, 0);
+
+    p5.scale(-1, 1);
+    p5.translate(-video.width, 0);
+
+    if (showFPS) {
+      const FPS = p5.frameRate();
+      p5.fill(255, 255, 255);
+      p5.textSize(20);
+      p5.text(`FPS: ${FPS.toFixed(2)}`, 10, 20);
+    }
+
     if (!ditheringOn) return;
     p5.loadPixels();
     for (let y = 0; y < video.height; y++) {
@@ -111,6 +126,7 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
 
 export default function FloydSteinberg() {
   const [ditheringOn, setDitheringOn] = useState(false);
+  const [showFPS, setShowFPS] = useState(true);
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center font-[Typewriter]">
@@ -120,13 +136,31 @@ export default function FloydSteinberg() {
         </button>
       </Link>
 
-      <button
-        onClick={() => setDitheringOn(!ditheringOn)}
-        className="cursor-pointer absolute top-1 right-1 text-black p-2 bg-white rounded-md hover:bg-gray-200"
-      >
-        Toggle Dithering
-      </button>
-      <P5Canvas sketch={sketch} ditheringOn={ditheringOn} />
+      <div className="flex flex-col absolute top-1 right-1 text-white p-1">
+        <div>
+          <input
+            className="mr-3"
+            id="ditheringToggle"
+            type="checkbox"
+            checked={ditheringOn}
+            onChange={() => setDitheringOn(!ditheringOn)}
+          />
+          <label htmlFor="ditheringToggle">Toggle Dithering</label>
+        </div>
+
+        <div>
+          <input
+            className="mr-3"
+            id="fpsToggle"
+            type="checkbox"
+            checked={showFPS}
+            onChange={() => setShowFPS(!showFPS)}
+          />
+          <label htmlFor="fpsToggle">Show FPS</label>
+        </div>
+      </div>
+
+      <P5Canvas sketch={sketch} ditheringOn={ditheringOn} showFPS={showFPS} />
     </div>
   );
 }
