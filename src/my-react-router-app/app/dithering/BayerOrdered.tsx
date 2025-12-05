@@ -38,8 +38,8 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
   let bayerSize: number = 0;
   let video: any;
   let onFPSChange: ((fps: number) => void) | undefined = undefined;
-  const WIDTH = 320;
-  const HEIGHT = 240;
+  const WIDTH = window.screen.width > window.screen.height ? 320 : 240;
+  const HEIGHT = window.screen.width > window.screen.height ? 240 : 320;
 
   let bayerMatrix: Array<Array<number>> = [[]];
 
