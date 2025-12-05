@@ -1,6 +1,6 @@
 import { P5Canvas } from "@p5-wrapper/react";
 import type { P5CanvasInstance, SketchProps } from "@p5-wrapper/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router";
 
 const newPixelValue = (value: number, error: number) => {
@@ -35,13 +35,13 @@ const setBrightness = (
 
 type MySketchProps = SketchProps & {
   ditheringOn: boolean;
-  showFPS: boolean;
+  onFPSChange?: (fps: number) => void;
 };
 
 const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
   let ditheringOn: boolean = false;
-  let showFPS: boolean = true;
   let video: any;
+  let onFPSChange: ((fps: number) => void) | undefined = undefined;
   const WIDTH = 320;
   const HEIGHT = 240;
 
@@ -57,7 +57,9 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
   p5.updateWithProps = (props) => {
     if (props.ditheringOn !== undefined) {
       ditheringOn = props.ditheringOn;
-      showFPS = props.showFPS;
+    }
+    if (props.onFPSChange !== undefined) {
+      onFPSChange = props.onFPSChange;
     }
   };
 
@@ -70,12 +72,8 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
     p5.scale(-1, 1);
     p5.translate(-video.width, 0);
 
-    if (showFPS) {
-      const FPS = p5.frameRate();
-      p5.fill(255, 255, 255);
-      p5.textSize(20);
-      p5.text(`FPS: ${FPS.toFixed(2)}`, 10, 20);
-    }
+    const FPS = p5.frameRate();
+    onFPSChange?.(FPS);
 
     if (!ditheringOn) return;
     p5.loadPixels();
@@ -127,7 +125,10 @@ const sketch = (p5: P5CanvasInstance<MySketchProps>) => {
 export default function FloydSteinberg() {
   const [ditheringOn, setDitheringOn] = useState(false);
   const [showFPS, setShowFPS] = useState(true);
-
+  const fpsRef = useRef<HTMLDivElement | null>(null);
+  const handleFPS = (fps: number) => {
+    if (fpsRef.current) fpsRef.current.textContent = ` FPS: ${fps.toFixed(2)}`;
+  };
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center font-[Typewriter]">
       <Link to="/">
@@ -136,7 +137,15 @@ export default function FloydSteinberg() {
         </button>
       </Link>
 
-      <h1 className="text-2xl mb-10">Floyd-Steinberg Dithering</h1>
+      <h1 className="text-2xl mb-5">Floyd-Steinberg Dithering</h1>
+
+      <div
+        hidden={!showFPS}
+        ref={fpsRef}
+        className="text-black bg-white p-1 rounded text-2xl mb-5 font-mono"
+      >
+        FPS: 0.00
+      </div>
 
       <div className="flex flex-col absolute top-1 right-1 text-white p-1">
         <div>
@@ -162,7 +171,11 @@ export default function FloydSteinberg() {
         </div>
       </div>
 
-      <P5Canvas sketch={sketch} ditheringOn={ditheringOn} showFPS={showFPS} />
+      <P5Canvas
+        sketch={sketch}
+        ditheringOn={ditheringOn}
+        onFPSChange={handleFPS}
+      />
     </div>
   );
 }
